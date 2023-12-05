@@ -1,14 +1,17 @@
 from rest_framework import serializers
-from .models import UserProfile
-from django.contrib.auth.models import User
+from .models import Profile
 
-class UserProfileSerializer(serializers.ModelSerializer):
-
+class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserProfile
-        fields = ["username", "email"]
-    
-    def create_user(self, **validated_data):
-        user = User.objects.create_user(**validated_data)
-        profile = UserProfile.objects.create(user=user, **validated_data)
+        model = Profile
+        fields = ["__all__"]
+
+    def create(self, validated_data):
+        user = Profile.objects.create(**validated_data)
         return user
+
+class LoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ["username", "password", "token"]
+        read_only_fields = ["token"]
