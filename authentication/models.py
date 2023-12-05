@@ -1,6 +1,9 @@
 from django.db import models
 from typing import Any
 from django.contrib.auth.models import UserManager, AbstractBaseUser
+import jwt
+from django.contrib.auth import settings
+from datetime import timedelta
 
 # Create your models here.
 class MyUserManager(UserManager):
@@ -30,7 +33,18 @@ class MyUserManager(UserManager):
 class User(AbstractBaseUser):
     username = models.CharField(max_length=200, unique=False, blank=False, null=True)
     email = models.EmailField(max_length=200, unique=True, blank=False, null=True)
+    # password = models.CharField(max_length=200, blank=False, null=False)
     date_joined = models.DateTimeField(auto_now_add=True)
 
-    objects = UserManager()
+    objects = MyUserManager()
     USERNAME_FIELD = 'username'
+
+    @property
+    def token(self):
+        token = jwt.encode(
+            {
+                "username":self.username, "email":self.email,"exp":timedelta(minutes=30)
+            },
+            settings.SECRET_KEY, algorithm="HS26"
+        )
+        return token
